@@ -14,6 +14,7 @@ RUN corepack enable &&     if [ -f pnpm-lock.yaml ]; then pnpm build; else npm r
 FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+ENV DATABASE_PATH=/home/data/bot.sqlite
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/package.json ./package.json
 COPY --from=build /app/node_modules ./node_modules

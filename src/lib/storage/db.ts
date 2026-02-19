@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { env } from '../env.js';
 import { logger } from '../logger.js';
 import Database from 'better-sqlite3';
@@ -18,6 +20,8 @@ class SqliteDb implements IDb {
   private db: Database.Database;
 
   constructor() {
+    const dbDir = path.dirname(env.DATABASE_PATH);
+    fs.mkdirSync(dbDir, { recursive: true });
     this.db = new Database(env.DATABASE_PATH);
     this.db.pragma('journal_mode = WAL');
     this.db.exec(`
@@ -53,10 +57,12 @@ class SqliteDb implements IDb {
 class PostgresDb implements IDb {
   public mode: DbMode = 'postgres';
   private pool: pg.Pool;
+  private readonly ready: Promise<void>;
 
   constructor() {
     if (!env.DATABASE_URL) throw new Error('DATABASE_URL is required for postgres mode');
     this.pool = new pg.Pool({ connectionString: env.DATABASE_URL });
+    this.ready = this.ensure();
   }
 
   private async ensure(): Promise<void> {
@@ -72,13 +78,13 @@ class PostgresDb implements IDb {
   }
 
   async kvGet(namespace: string, key: string): Promise<string | null> {
-    await this.ensure();
+    await this.ready;
     const res = await this.pool.query('SELECT value FROM kv WHERE namespace=$1 AND key=$2', [namespace, key]);
     return res.rows[0]?.value ?? null;
   }
 
   async kvSet(namespace: string, key: string, value: string): Promise<void> {
-    await this.ensure();
+    await this.ready;
     await this.pool.query(`
       INSERT INTO kv(namespace, key, value, updated_at)
       VALUES($1,$2,$3,$4)
@@ -88,7 +94,7 @@ class PostgresDb implements IDb {
   }
 
   async kvDelete(namespace: string, key: string): Promise<void> {
-    await this.ensure();
+    await this.ready;
     await this.pool.query('DELETE FROM kv WHERE namespace=$1 AND key=$2', [namespace, key]);
   }
 }

@@ -1,15 +1,9 @@
 import { Command } from '@sapphire/framework';
 import { triggers } from '../../message-triggers/index.js';
 import { kv } from '../../lib/storage/kv.js';
+import { env } from '../../lib/env.js';
 
 export class TriggersAdminCommand extends Command {
-  public constructor(ctx: Command.Context, opts: Command.Options) {
-    super(ctx, {
-      ...opts,
-      preconditions: ['IsAdmin']
-    });
-  }
-
   public override registerApplicationCommands(registry: Command.Registry) {
     registry.registerChatInputCommand((builder) =>
       builder
@@ -42,7 +36,21 @@ export class TriggersAdminCommand extends Command {
     return val ?? true;
   }
 
+  private ensureAdmin(interaction: Command.ChatInputCommandInteraction): string | null {
+    const adminRoleIds = (env.ADMIN_ROLE_IDS || '').split(',').map((s) => s.trim()).filter(Boolean);
+    if (!adminRoleIds.length) return 'ADMIN_ROLE_IDS is not configured.';
+    if (!interaction.inGuild()) return 'Admin commands must be run in a server.';
+
+    const member = interaction.member;
+    const roles = 'roles' in member ? member.roles : [];
+    const has = Array.isArray(roles) ? roles.some((r) => adminRoleIds.includes(r)) : false;
+    return has ? null : 'You do not have permission to run this command.';
+  }
+
   public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
+    const denied = this.ensureAdmin(interaction);
+    if (denied) return interaction.reply({ content: denied, ephemeral: true });
+
     if (!interaction.inGuild()) {
       return interaction.reply({ content: 'This command must be used in a server.', ephemeral: true });
     }

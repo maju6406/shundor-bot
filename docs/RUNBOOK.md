@@ -30,3 +30,17 @@ Outputs:
 
 ## Azure hosting
 See `docs/AZURE_DEPLOYMENT_CHECKLIST.md`.
+
+## Azure App Service validation
+Before production traffic, verify all of the following:
+1. App Service Plan SKU is Basic (or higher).
+2. Web App settings:
+   - `Always On = On`
+   - `WebSockets = On`
+   - Instance count is `1` until Postgres-backed scale validation is complete.
+3. App settings include:
+   - `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DATABASE_URL`
+   - `NODE_ENV=production`
+4. If health checks are enabled:
+   - `HTTP_ENABLED=true`
+   - Health check path points to `/healthz`
