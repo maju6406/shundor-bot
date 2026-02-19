@@ -1,0 +1,31 @@
+{
+  "name": "discord-sapphire-hubot-migration",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "inventory": "tsx tools/inventory/scanHubotScripts.ts && tsx tools/inventory/generateBacklog.ts",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@sapphire/framework": "^5.3.3",
+    "discord.js": "^14.15.3",
+    "dotenv": "^16.4.5",
+    "pino": "^9.3.2",
+    "undici": "^6.19.2",
+    "zod": "^3.23.8",
+    "pg": "^8.12.0",
+    "better-sqlite3": "^11.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "eslint": "^9.8.0",
+    "@eslint/js": "^9.8.0",
+    "typescript-eslint": "^8.0.0"
+  }
+}
