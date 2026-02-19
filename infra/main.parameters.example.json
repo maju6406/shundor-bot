@@ -1,0 +1,63 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "appName": {
+      "value": "hubot-migrator-prod-001"
+    },
+    "location": {
+      "value": "eastus"
+    },
+    "appServiceSkuName": {
+      "value": "B1"
+    },
+    "linuxFxVersion": {
+      "value": "DOCKER|ghcr.io/your-org/discord-sapphire-hubot-migration:latest"
+    },
+    "appCommandLine": {
+      "value": ""
+    },
+    "enableManagedIdentity": {
+      "value": true
+    },
+    "acrUseManagedIdentityCreds": {
+      "value": false
+    },
+    "acrName": {
+      "value": ""
+    },
+    "discordToken": {
+      "value": "REPLACE_ME"
+    },
+    "discordClientId": {
+      "value": "REPLACE_ME"
+    },
+    "discordGuildId": {
+      "value": ""
+    },
+    "botName": {
+      "value": "HubotMigrator"
+    },
+    "logLevel": {
+      "value": "info"
+    },
+    "adminRoleIds": {
+      "value": ""
+    },
+    "databaseUrl": {
+      "value": "REPLACE_ME"
+    },
+    "nodeEnv": {
+      "value": "production"
+    },
+    "gitSha": {
+      "value": ""
+    },
+    "httpEnabled": {
+      "value": true
+    },
+    "httpPort": {
+      "value": 3000
+    }
+  }
+}

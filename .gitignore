@@ -7,3 +7,4 @@ manifest/*.json
 manifest/*.csv
 !.keep
 .DS_Store
+infra/main.parameters.json

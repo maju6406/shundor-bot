@@ -31,6 +31,17 @@ Outputs:
 ## Azure hosting
 See `docs/AZURE_DEPLOYMENT_CHECKLIST.md`.
 
+### Bicep deployment
+This repo includes:
+- `infra/main.bicep`
+- `infra/main.parameters.example.json`
+
+Usage:
+1. Copy `infra/main.parameters.example.json` to `infra/main.parameters.json`.
+2. Fill required values (especially `appName`, `linuxFxVersion`, `discordToken`, `discordClientId`, `databaseUrl`).
+3. Deploy:
+   - `az deployment group create --resource-group <resource-group> --template-file infra/main.bicep --parameters @infra/main.parameters.json`
+
 ## Azure App Service validation
 Before production traffic, verify all of the following:
 1. App Service Plan SKU is Basic (or higher).
