@@ -8,6 +8,7 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "inventory": "tsx tools/inventory/scanHubotScripts.ts && tsx tools/inventory/generateBacklog.ts",
+    "url-health": "tsx tools/inventory/checkExternalUrls.ts",
     "lint": "eslint ."
   },
   "dependencies": {

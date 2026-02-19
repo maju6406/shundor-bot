@@ -1,0 +1,205 @@
+# URL Health Report
+
+Scanned scripts root: `/Users/amajumdar/Downloads/discord-sapphire-hubot-migration/vendor/hubot-scripts/src/scripts`
+Total scripts scanned: 260
+Total unique URLs found: 510
+URLs returning 200: 416
+URLs not returning 200: 94
+Dead/invalid URLs: 0
+
+## Dead/Invalid URLs
+
+- None
+
+## Other Non-200 URLs
+
+- http://api.chartbeat.com/live/quickstats/v3/?apikey=#{apiKey}&host=#{site} -> 503
+  - referenced by: `chartbeat.coffee`
+- http://api.dribbble.com/shots/#{query} -> 202
+  - referenced by: `dribbble.coffee`
+- http://api.imgur.com -> 400
+  - referenced by: `cheer.coffee`, `gif-me.coffee`
+- http://api.soundcloud.com/resolve.json?client_id=#{process.env.HUBOT_SOUNDCLOUD_CLIENTID}&url=#{url} -> 429
+  - referenced by: `soundcloud-info.coffee`
+- http://api.tumblr.com/v2/blog/iwdrm.tumblr.com/posts/photo -> 401
+  - referenced by: `iwdrm.coffee`
+- http://api.tumblr.com/v2/blog/programmerryangosling.tumblr.com/posts?api_key=#{api_key} -> 401
+  - referenced by: `gosling.coffee`
+- http://api.tumblr.com/v2/blog/programmerryangosling.tumblr.com/posts?api_key=#{api_key}&offset=#{rand}&limit=1 -> 401
+  - referenced by: `gosling.coffee`
+- http://api.twitter.com/1/friends/ids.json?screen_name= -> 520
+  - referenced by: `vanity.coffee`
+- http://api.twitter.com/1/statuses/user_timeline.json -> 520
+  - referenced by: `horse.coffee`
+- http://api.twitter.com/1/statuses/user_timeline.json?screen_name=cumber_world&count=200&exclude_replies=true&include_rts=false -> 520
+  - referenced by: `cumberbatch.coffee`
+- http://api.twitter.com/1/users/show.json?user_id=#{id} -> 520
+  - referenced by: `vanity.coffee`
+- http://api.wordnik.com/v4/word.json/#{escape(word)}/#{escape(resource)} -> 422
+  - referenced by: `wordnik.coffee`
+- http://api.wordnik.com/v4/word.json/#{escape(word)}/definitions -> 422
+  - referenced by: `hangman.coffee`
+- http://api.wordnik.com/v4/words.json/randomWord -> 401
+  - referenced by: `hangman.coffee`
+- http://api.worldweatheronline.com/free/v2/tz.ashx -> 403
+  - referenced by: `time.coffee`
+- http://beeradvocate.com/beer/ -> 403
+  - referenced by: `beeradvocate.coffee`
+- http://beeradvocate.com/beer/profile/ -> 403
+  - referenced by: `beeradvocate.coffee`
+- http://beeradvocate.com/im/thumb.php?im=beers/ -> 403
+  - referenced by: `beeradvocate.coffee`
+- http://catfacts-api.appspot.com/api/facts?number=1 -> 500
+  - referenced by: `catfacts.coffee`
+- http://duckduckgo.com/Astronomy -> 202
+  - referenced by: `abstract.coffee`
+- http://google.com/complete/search -> 400
+  - referenced by: `complete.coffee`
+- http://maps.googleapis.com/maps/api/directions/json -> 400
+  - referenced by: `directions.coffee`
+- http://placekitten.com -> 521
+  - referenced by: `kittens.coffee`
+- http://rubygems.org/api/v1/gems/#{gemname}.json -> 401
+  - referenced by: `gemwhois.coffee`
+- http://s3.amazonaws.com/kym-assets/entries/icons/original/000/002/252/me-gusta.jpg -> 403
+  - referenced by: `megusta.coffee`
+- http://t.co/LFzQFnOD -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://tryruby.org/levels/1/challenges/0 -> 403
+  - referenced by: `ruby.coffee`
+- http://twitter.com/#{username} -> 520
+  - referenced by: `tweeter.coffee`
+- http://twitter.com/rands/statuses/108597258055979008 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/11309449247 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/11876666225725440 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/131426938597277696 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/132114748086030337 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/133345216886345729 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/139152607083102208 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/144102532220858368 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/14458189005 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/152954436640182273 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/156172596143063040 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/156260385010356224 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/158647734558138368 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/159808299779358720 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/182113521876729856 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/182492475724800001 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/189049908639186944 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/189203032905494529 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/193155583938002944 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/19513088389 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/19799390667415552 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/202847708271230976 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/20333834621 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/21933940584 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/22001311155228674 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/22031352673 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/22581884963 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/235153466081808385 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/24694739571 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/25998859249 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/26384939022 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/26584224990 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/2793071211 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/28432698384 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/4345861202 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/43792659864760320 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/52036340375764992 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/53247126817345537 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/54290475783421952 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/56076748953092098 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/6090022746 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/6472192856 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/83340096601993216 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/93400188479221760 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://twitter.com/rands/statuses/99521172005326848 -> 520
+  - referenced by: `rands-when-you-say.coffee`
+- http://watme.herokuapp.com/random -> 503
+  - referenced by: `wat.coffee`
+- http://ws.audioscrobbler.com/2.0/ -> 400
+  - referenced by: `lastfm_np.coffee`
+- http://www.iheartquotes.com/api/v1/random -> 409
+  - referenced by: `quote.coffee`
+- http://www.kickstarter.com/projects/#{process.env.KICKSTARTER_PROJECT} -> 403
+  - referenced by: `kickstarter.coffee`
+- http://www.tryerlang.org/api/eval/default/intro -> 405
+  - referenced by: `tryerlang.coffee`
+- https://a248.e.akamai.net/camo.github.com/0a7ede4e91eabd1d5e0a86901efb984136765410/687474703a2f2f696d67342e6a6f7972656163746f722e636f6d2f706963732f706f73742f6769662d737461722d776172732d67616e676e616d2d7374796c652d68616e2d736f6c6f2d3337303636342e676966 -> 403
+  - referenced by: `gangnam.coffee`
+- https://a248.e.akamai.net/camo.github.com/d82d76a32a0d667c8f2f6d7bf0d9e0b1abe75399/687474703a2f2f7261636b2e302e6d736863646e2e636f6d2f6d656469612f5a676b794d4445794c7a45774c7a45344c7a4577587a4d31587a4134587a51794d6c396d6157786c2f6130376264663034 -> 403
+  - referenced by: `gangnam.coffee`
+- https://a248.e.akamai.net/camo.github.com/fd39c2be2c139705edba5c52738a7c111be9ad37/687474703a2f2f7777772e726566696e65646775792e636f6d2f77702d636f6e74656e742f75706c6f6164732f323031322f31302f67616e676e616d2d7374796c652d737461722d776172732d6769662e676966 -> 403
+  - referenced by: `gangnam.coffee`
+- https://api.imgur.com/3/gallery/r/aww -> 401
+  - referenced by: `cheer.coffee`
+- https://api.imgur.com/3/gallery/search -> 401
+  - referenced by: `gif-me.coffee`
+- https://clients1.google.com/complete/search -> 400
+  - referenced by: `poem.coffee`
+- https://graph.facebook.com/#{@id} -> 400
+  - referenced by: `offthegrid.coffee`
+- https://graph.facebook.com/#{otg_id}/events -> 400
+  - referenced by: `offthegrid.coffee`
+- https://maps.googleapis.com/maps/api/geocode/json -> 400
+  - referenced by: `geocodeme.coffee`
+- https://p.twimg.com/AoTI6tLCIAAITfB.jpg -> 400
+  - referenced by: `sensitive.coffee`
+- https://rally1.rallydev.com/slm/webservice/ -> 401
+  - referenced by: `rally.coffee`
+- https://rubygems.org/api/v1/search.json -> 400
+  - referenced by: `rubygems.coffee`
+- https://secure.gaug.es/gauges -> 401
+  - referenced by: `gauges.coffee`
+- https://trac.transmissionbt.com/wiki/UserDocumentation -> 403
+  - referenced by: `transmission.coffee`
+- https://www.googleapis.com/customsearch/v1 -> 403
+  - referenced by: `google-search-api.coffee`
+- https://www.npmjs.org/package/#{packageName} -> 403
+  - referenced by: `npm.coffee`
+
+Raw results: `manifest/url-health.json`
