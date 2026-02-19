@@ -58,6 +58,24 @@
     },
     "httpPort": {
       "value": 3000
+    },
+    "enableObservability": {
+      "value": true
+    },
+    "createLogAnalyticsWorkspace": {
+      "value": true
+    },
+    "logAnalyticsWorkspaceName": {
+      "value": "hubot-migrator-law"
+    },
+    "logAnalyticsRetentionInDays": {
+      "value": 30
+    },
+    "createApplicationInsights": {
+      "value": true
+    },
+    "applicationInsightsName": {
+      "value": "hubot-migrator-appi"
     }
   }
 }

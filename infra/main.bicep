@@ -75,8 +75,80 @@ param httpEnabled bool = true
 @description('App HTTP port.')
 param httpPort int = 3000
 
+@description('Enable Azure observability resources and wiring.')
+param enableObservability bool = true
+
+@description('Create a new Log Analytics workspace in this resource group.')
+param createLogAnalyticsWorkspace bool = true
+
+@description('Name for Log Analytics workspace (used when creating or referencing in this resource group).')
+param logAnalyticsWorkspaceName string = '${appName}-law'
+
+@description('Retention (days) for Log Analytics workspace.')
+@minValue(30)
+@maxValue(730)
+param logAnalyticsRetentionInDays int = 30
+
+@description('Create an Application Insights resource connected to Log Analytics.')
+param createApplicationInsights bool = true
+
+@description('Name of the Application Insights component.')
+param applicationInsightsName string = '${appName}-appi'
+
 var planName = '${appName}-plan'
 var identityType = enableManagedIdentity ? 'SystemAssigned' : 'None'
+var hasWorkspace = createLogAnalyticsWorkspace || (!createLogAnalyticsWorkspace && !empty(logAnalyticsWorkspaceName))
+var enableAi = enableObservability && createApplicationInsights && hasWorkspace
+var baseAppSettings = [
+  {
+    name: 'DISCORD_TOKEN'
+    value: discordToken
+  }
+  {
+    name: 'DISCORD_CLIENT_ID'
+    value: discordClientId
+  }
+  {
+    name: 'DISCORD_GUILD_ID'
+    value: discordGuildId
+  }
+  {
+    name: 'BOT_NAME'
+    value: botName
+  }
+  {
+    name: 'LOG_LEVEL'
+    value: logLevel
+  }
+  {
+    name: 'ADMIN_ROLE_IDS'
+    value: adminRoleIds
+  }
+  {
+    name: 'DATABASE_URL'
+    value: databaseUrl
+  }
+  {
+    name: 'NODE_ENV'
+    value: nodeEnv
+  }
+  {
+    name: 'GIT_SHA'
+    value: gitSha
+  }
+  {
+    name: 'HTTP_ENABLED'
+    value: string(httpEnabled)
+  }
+  {
+    name: 'HTTP_PORT'
+    value: string(httpPort)
+  }
+  {
+    name: 'WEBSITES_PORT'
+    value: string(httpPort)
+  }
+]
 
 resource plan 'Microsoft.Web/serverfarms@2023-12-01' = {
   name: planName
@@ -107,56 +179,17 @@ resource site 'Microsoft.Web/sites@2023-12-01' = {
       alwaysOn: true
       webSocketsEnabled: true
       acrUseManagedIdentityCreds: acrUseManagedIdentityCreds
-      appSettings: [
-        {
-          name: 'DISCORD_TOKEN'
-          value: discordToken
-        }
-        {
-          name: 'DISCORD_CLIENT_ID'
-          value: discordClientId
-        }
-        {
-          name: 'DISCORD_GUILD_ID'
-          value: discordGuildId
-        }
-        {
-          name: 'BOT_NAME'
-          value: botName
-        }
-        {
-          name: 'LOG_LEVEL'
-          value: logLevel
-        }
-        {
-          name: 'ADMIN_ROLE_IDS'
-          value: adminRoleIds
-        }
-        {
-          name: 'DATABASE_URL'
-          value: databaseUrl
-        }
-        {
-          name: 'NODE_ENV'
-          value: nodeEnv
-        }
-        {
-          name: 'GIT_SHA'
-          value: gitSha
-        }
-        {
-          name: 'HTTP_ENABLED'
-          value: string(httpEnabled)
-        }
-        {
-          name: 'HTTP_PORT'
-          value: string(httpPort)
-        }
-        {
-          name: 'WEBSITES_PORT'
-          value: string(httpPort)
-        }
-      ]
+      appSettings: concat(
+        baseAppSettings,
+        enableAi
+          ? [
+              {
+                name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+                value: appInsights!.properties.ConnectionString
+              }
+            ]
+          : []
+      )
     }
   }
 }
@@ -183,6 +216,71 @@ resource siteConfig 'Microsoft.Web/sites/config@2023-12-01' = {
   }
 }
 
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = if (enableObservability && createLogAnalyticsWorkspace) {
+  name: logAnalyticsWorkspaceName
+  location: location
+  properties: {
+    sku: {
+      name: 'PerGB2018'
+    }
+    retentionInDays: logAnalyticsRetentionInDays
+    features: {
+      searchVersion: 1
+      legacy: 0
+      enableLogAccessUsingOnlyResourcePermissions: true
+    }
+  }
+}
+
+resource existingLogAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = if (enableObservability && !createLogAnalyticsWorkspace && !empty(logAnalyticsWorkspaceName)) {
+  name: logAnalyticsWorkspaceName
+}
+
+resource appInsights 'Microsoft.Insights/components@2020-02-02' = if (enableAi) {
+  name: applicationInsightsName
+  location: location
+  kind: 'web'
+  properties: {
+    Application_Type: 'web'
+    WorkspaceResourceId: createLogAnalyticsWorkspace ? logAnalytics.id : existingLogAnalytics.id
+    IngestionMode: 'LogAnalytics'
+  }
+}
+
+resource siteDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = if (enableObservability && hasWorkspace) {
+  name: '${appName}-diag'
+  scope: site
+  properties: {
+    workspaceId: createLogAnalyticsWorkspace ? logAnalytics.id : existingLogAnalytics.id
+    logs: [
+      {
+        category: 'AppServiceAppLogs'
+        enabled: true
+      }
+      {
+        category: 'AppServiceConsoleLogs'
+        enabled: true
+      }
+      {
+        category: 'AppServiceHTTPLogs'
+        enabled: true
+      }
+      {
+        category: 'AppServicePlatformLogs'
+        enabled: true
+      }
+    ]
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+      }
+    ]
+  }
+}
+
 output webAppName string = site.name
 output webAppDefaultHostName string = site.properties.defaultHostName
 output webAppUrl string = 'https://${site.properties.defaultHostName}'
+output logAnalyticsWorkspaceId string = enableObservability && hasWorkspace ? (createLogAnalyticsWorkspace ? logAnalytics.id : existingLogAnalytics.id) : ''
+output applicationInsightsName string = enableAi ? appInsights.name : ''
