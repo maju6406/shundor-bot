@@ -15,6 +15,27 @@ export interface IDb {
   kvDelete(namespace: string, key: string): Promise<void>;
 }
 
+class MemoryDb implements IDb {
+  public mode: DbMode = 'sqlite';
+  private readonly kvStore = new Map<string, string>();
+
+  private key(namespace: string, key: string): string {
+    return `${namespace}::${key}`;
+  }
+
+  async kvGet(namespace: string, key: string): Promise<string | null> {
+    return this.kvStore.get(this.key(namespace, key)) ?? null;
+  }
+
+  async kvSet(namespace: string, key: string, value: string): Promise<void> {
+    this.kvStore.set(this.key(namespace, key), value);
+  }
+
+  async kvDelete(namespace: string, key: string): Promise<void> {
+    this.kvStore.delete(this.key(namespace, key));
+  }
+}
+
 class SqliteDb implements IDb {
   public mode: DbMode = 'sqlite';
   private db: Database.Database;
@@ -104,6 +125,15 @@ export function createDb(): IDb {
     logger.info('Using Postgres database (DATABASE_URL set).');
     return new PostgresDb();
   }
-  logger.info('Using SQLite database (DATABASE_URL not set).');
-  return new SqliteDb();
+
+  try {
+    logger.info('Using SQLite database (DATABASE_URL not set).');
+    return new SqliteDb();
+  } catch (error) {
+    logger.warn(
+      { error },
+      'SQLite initialization failed in local mode; falling back to in-memory KV store for this process.'
+    );
+    return new MemoryDb();
+  }
 }
