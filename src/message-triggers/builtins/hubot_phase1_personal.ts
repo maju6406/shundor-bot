@@ -1,5 +1,12 @@
 import type { Trigger } from '../types.js';
 import { safeReply } from '../router.js';
+import {
+  POINTS_COOLDOWN_SECONDS,
+  awardPointsBulk,
+  getCooldownRemainingSeconds,
+  pickAwardGif,
+  setCooldown
+} from '../../lib/points/service.js';
 
 function pickRandom(items: readonly string[]): string {
   if (!items.length) return '';
@@ -36,6 +43,45 @@ const twirl = ['https://media.giphy.com/media/6TEo67Fh1CRQk/giphy.gif'];
 const fivethirty = ['https://media.giphy.com/media/QzlAdQIbcM7sY/giphy.gif'];
 
 export const hubotPersonalPhase1Triggers: Trigger[] = [
+  {
+    id: 'hubot.hear.points-bang',
+    kind: 'hear',
+    description: 'Saying "points!" gives +1 to other real users in the channel.',
+    cooldownSeconds: 0,
+    patterns: [/^\s*points!\s*$/i],
+    async run(ctx) {
+      const { message } = ctx;
+      if (!message.inGuild() || !message.guildId || !message.member) return;
+
+      const remaining = await getCooldownRemainingSeconds(message.guildId, message.author.id);
+      if (remaining > 0) {
+        await safeReply(message, `Points cooldown active (${remaining}s remaining).`);
+        return;
+      }
+
+      const maybeMembers = (message.channel as { members?: unknown }).members;
+      const channelMembers = maybeMembers && typeof maybeMembers === 'object' && 'values' in maybeMembers
+        ? [...(maybeMembers as { values: () => Iterable<any> }).values()]
+        : [];
+      const receiverIds = channelMembers
+        .filter((m) => !m.user.bot && m.id !== message.author.id)
+        .map((m) => m.id);
+
+      if (!receiverIds.length) {
+        await safeReply(message, 'No other real users found in this channel right now.');
+        return;
+      }
+
+      const awardedCount = await awardPointsBulk(message.guildId, message.author.id, receiverIds, 1);
+      await setCooldown(message.guildId, message.author.id, POINTS_COOLDOWN_SECONDS);
+
+      const mentions = receiverIds.map((id) => `<@${id}>`).join(' ');
+      const gif = pickAwardGif();
+      const lines = [`+1 point to ${awardedCount} users: ${mentions}`];
+      if (gif) lines.push(gif);
+      await safeReply(message, lines.join('\n'));
+    }
+  },
   {
     id: 'hubot.hear.530',
     kind: 'hear',
