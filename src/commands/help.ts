@@ -5,7 +5,7 @@ import { env } from '../lib/env.js';
 export class HelpCommand extends Command {
   public override registerApplicationCommands(registry: Command.Registry) {
     registry.registerChatInputCommand((builder) =>
-      builder.setName('help').setDescription('Show help and available commands')
+      builder.setName('shundorbot-help').setDescription('Show help and available commands')
     );
   }
 

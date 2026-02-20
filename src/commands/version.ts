@@ -8,7 +8,7 @@ const pkg = require('../../package.json') as { version: string };
 export class VersionCommand extends Command {
   public override registerApplicationCommands(registry: Command.Registry) {
     registry.registerChatInputCommand((builder) =>
-      builder.setName('version').setDescription('Show bot version')
+      builder.setName('shundorbot-version').setDescription('Show bot version')
     );
   }
 

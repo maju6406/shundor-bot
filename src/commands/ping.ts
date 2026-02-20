@@ -3,7 +3,7 @@ import { Command } from '@sapphire/framework';
 export class PingCommand extends Command {
   public override registerApplicationCommands(registry: Command.Registry) {
     registry.registerChatInputCommand((builder) =>
-      builder.setName('ping').setDescription('Health check')
+      builder.setName('shundorbot-ping').setDescription('Health check')
     );
   }
 

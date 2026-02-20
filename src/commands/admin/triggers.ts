@@ -7,7 +7,7 @@ export class TriggersAdminCommand extends Command {
   public override registerApplicationCommands(registry: Command.Registry) {
     registry.registerChatInputCommand((builder) =>
       builder
-        .setName('triggers')
+        .setName('shundorbot-triggers')
         .setDescription('Manage message triggers')
         .addSubcommand((sc) =>
           sc.setName('list').setDescription('List triggers and enabled status')
