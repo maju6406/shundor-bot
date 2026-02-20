@@ -6,6 +6,7 @@ const schema = z
     DISCORD_TOKEN: z.string().min(1, 'DISCORD_TOKEN is required'),
     DISCORD_CLIENT_ID: z.string().min(1, 'DISCORD_CLIENT_ID is required'),
     DISCORD_GUILD_ID: z.string().optional(),
+    GIPHY_API_KEY: z.string().optional(),
     BOT_NAME: z.string().default('HubotMigrator'),
     LOG_LEVEL: z.string().default('info'),
     BOT_PREFIX: z.string().optional(),
