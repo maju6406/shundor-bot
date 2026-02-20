@@ -4,9 +4,11 @@ import {
   POINTS_COOLDOWN_SECONDS,
   awardPointsBulk,
   getCooldownRemainingSeconds,
+  logPointsAwardEvent,
   pickAwardGif,
   setCooldown
 } from '../../lib/points/service.js';
+import { specialPointsTotalMessage } from '../../lib/points/milestones.js';
 
 function pickRandom(items: readonly string[]): string {
   if (!items.length) return '';
@@ -72,12 +74,30 @@ export const hubotPersonalPhase1Triggers: Trigger[] = [
         return;
       }
 
-      const awardedCount = await awardPointsBulk(message.guildId, message.author.id, receiverIds, 1);
+      const awarded = await awardPointsBulk(message.guildId, message.author.id, receiverIds, 1);
       await setCooldown(message.guildId, message.author.id, POINTS_COOLDOWN_SECONDS);
+      for (const row of awarded) {
+        logPointsAwardEvent({
+          guildId: message.guildId,
+          giverId: message.author.id,
+          receiverId: row.receiverId,
+          amount: 1,
+          total: row.total,
+          source: 'points-bang',
+          messageId: message.id
+        });
+      }
 
       const mentions = receiverIds.map((id) => `<@${id}>`).join(' ');
       const gif = pickAwardGif();
-      const lines = [`+1 point to ${awardedCount} users: ${mentions}`];
+      const lines = [`+1 point to ${awarded.length} users: ${mentions}`];
+      const milestoneLines = awarded
+        .map((row) => {
+          const special = specialPointsTotalMessage(row.total);
+          return special ? `<@${row.receiverId}> ${special}` : null;
+        })
+        .filter(Boolean) as string[];
+      lines.push(...milestoneLines);
       if (gif) lines.push(gif);
       await safeReply(message, lines.join('\n'));
     }

@@ -4,9 +4,11 @@ import {
   POINTS_MAX_GRANT,
   awardPoints,
   getCooldownRemainingSeconds,
+  logPointsAwardEvent,
   pickAwardGif,
   setCooldown
 } from '../lib/points/service.js';
+import { specialPointsTotalMessage } from '../lib/points/milestones.js';
 
 export class PointsCommand extends Command {
   public override registerApplicationCommands(registry: Command.Registry) {
@@ -23,6 +25,13 @@ export class PointsCommand extends Command {
             .setMaxValue(POINTS_MAX_GRANT)
             .setRequired(false)
         )
+        .addStringOption((option) =>
+          option
+            .setName('reason')
+            .setDescription('Why you are giving points (e.g. "for helping with deploys")')
+            .setMaxLength(200)
+            .setRequired(false)
+        )
     );
   }
 
@@ -33,6 +42,7 @@ export class PointsCommand extends Command {
 
     const receiver = interaction.options.getUser('user', true);
     const amount = interaction.options.getInteger('number') ?? 1;
+    const reason = interaction.options.getString('reason')?.trim() || undefined;
     const giverId = interaction.user.id;
 
     if (receiver.id === giverId) {
@@ -53,9 +63,26 @@ export class PointsCommand extends Command {
 
     const total = await awardPoints(interaction.guildId, giverId, receiver.id, amount);
     await setCooldown(interaction.guildId, giverId, POINTS_COOLDOWN_SECONDS);
-    const gif = pickAwardGif();
+    logPointsAwardEvent({
+      guildId: interaction.guildId,
+      giverId,
+      receiverId: receiver.id,
+      amount,
+      total,
+      source: 'slash',
+      reason,
+      messageId: interaction.id
+    });
 
-    const lines = [`Awww yiss, <@${receiver.id}> now has ${total} points!`];
+    const gif = pickAwardGif();
+    const special = specialPointsTotalMessage(total);
+
+    const lines = [
+      reason
+        ? `Awww yiss, <@${receiver.id}> now has ${total} points for "${reason}"!`
+        : `Awww yiss, <@${receiver.id}> now has ${total} points!`
+    ];
+    if (special) lines.push(special);
     if (gif) lines.push(gif);
 
     return interaction.reply({ content: lines.join('\n') });

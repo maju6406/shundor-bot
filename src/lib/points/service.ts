@@ -1,5 +1,6 @@
 import { db, kv } from '../storage/kv.js';
 import { pointsAwardGifs } from './gifs.js';
+import { logger } from '../logger.js';
 
 export const POINTS_COOLDOWN_SECONDS = 30;
 export const POINTS_MAX_GRANT = 100;
@@ -113,15 +114,47 @@ export async function awardPointsBulk(
   giverId: string,
   receiverIds: readonly string[],
   amount: number
-): Promise<number> {
-  if (!receiverIds.length) return 0;
+): Promise<Array<{ receiverId: string; total: number }>> {
+  if (!receiverIds.length) return [];
   const now = Date.now();
   for (const receiverId of receiverIds) {
     await db.pointsGive(guildId, giverId, receiverId, amount, now);
   }
-  return receiverIds.length;
+  const totals: Array<{ receiverId: string; total: number }> = [];
+  for (const receiverId of receiverIds) {
+    totals.push({ receiverId, total: await db.pointsGetTotal(guildId, receiverId) });
+  }
+  return totals;
 }
 
 export async function getTopPoints(guildId: string, window: WindowName, limit = LEADERBOARD_LIMIT) {
   return db.pointsTop(guildId, getWindowStartMs(window), limit);
+}
+
+export function logPointsAwardEvent(input: {
+  guildId: string;
+  giverId: string;
+  receiverId: string;
+  amount: number;
+  total: number;
+  source: 'slash' | 'points-bang';
+  reason?: string;
+  messageId?: string;
+}): void {
+  const sentAt = new Date().toISOString();
+  logger.info(
+    {
+      event: 'points.award',
+      sentAt,
+      guildId: input.guildId,
+      giverId: input.giverId,
+      receiverId: input.receiverId,
+      amount: input.amount,
+      total: input.total,
+      source: input.source,
+      reason: input.reason,
+      messageId: input.messageId
+    },
+    'Points awarded'
+  );
 }
