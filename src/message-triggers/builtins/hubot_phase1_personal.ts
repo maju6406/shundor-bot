@@ -1,5 +1,6 @@
 import type { Trigger } from '../types.js';
 import { safeReply } from '../router.js';
+import { PermissionFlagsBits } from 'discord.js';
 import {
   POINTS_COOLDOWN_SECONDS,
   awardPointsBulk,
@@ -61,12 +62,13 @@ export const hubotPersonalPhase1Triggers: Trigger[] = [
         return;
       }
 
-      const maybeMembers = (message.channel as { members?: unknown }).members;
-      const channelMembers = maybeMembers && typeof maybeMembers === 'object' && 'values' in maybeMembers
-        ? [...(maybeMembers as { values: () => Iterable<any> }).values()]
-        : [];
-      const receiverIds = channelMembers
-        .filter((m) => !m.user.bot && m.id !== message.author.id)
+      const guildMembers = await message.guild.members.fetch();
+      const receiverIds = guildMembers
+        .filter((m) => {
+          if (m.user.bot || m.id === message.author.id) return false;
+          const perms = message.channel.permissionsFor(m);
+          return perms?.has(PermissionFlagsBits.ViewChannel) ?? false;
+        })
         .map((m) => m.id);
 
       if (!receiverIds.length) {
