@@ -2,8 +2,8 @@ name: Deploy Azure
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - "v*"
   workflow_dispatch:
     inputs:
       release_version:
@@ -44,6 +44,8 @@ jobs:
           short_sha="${GITHUB_SHA::7}"
           if [ -n "${{ github.event.inputs.release_version || '' }}" ]; then
             release_version="${{ github.event.inputs.release_version }}"
+          elif [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            release_version="${GITHUB_REF_NAME#v}"
           else
             release_version="0.1.${GITHUB_RUN_NUMBER}"
           fi
