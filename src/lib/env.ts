@@ -7,6 +7,13 @@ const schema = z
     DISCORD_CLIENT_ID: z.string().min(1, 'DISCORD_CLIENT_ID is required'),
     DISCORD_GUILD_ID: z.string().optional(),
     GIPHY_API_KEY: z.string().optional(),
+    RELEASE_VERSION: z.string().optional(),
+    RELEASE_NOTES: z.string().optional(),
+    RELEASE_ANNOUNCE_CHANNEL: z.string().default('general'),
+    RELEASE_ANNOUNCE_ENABLED: z
+      .union([z.boolean(), z.string()])
+      .transform((v) => (typeof v === 'boolean' ? v : v.toLowerCase() === 'true'))
+      .default(true),
     BOT_NAME: z.string().default('HubotMigrator'),
     LOG_LEVEL: z.string().default('info'),
     BOT_PREFIX: z.string().optional(),
