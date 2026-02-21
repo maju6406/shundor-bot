@@ -14,9 +14,9 @@ export class VersionCommand extends Command {
   }
 
   public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
-    const sha = env.GIT_SHA ? ` (${env.GIT_SHA})` : '';
-    const base = `v${pkg.version}${sha}`;
     const releaseVersion = resolveReleaseVersion();
+    const sha = env.GIT_SHA ? ` (${env.GIT_SHA})` : '';
+    const base = releaseVersion ? `${releaseVersion}${sha}` : `v${pkg.version}${sha}`;
     if (!releaseVersion) return interaction.reply({ content: base });
 
     const release = buildReleaseAnnouncementText(releaseVersion);
