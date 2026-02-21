@@ -1,10 +1,19 @@
 import { Command } from '@sapphire/framework';
-import { createRequire } from 'node:module';
+import fs from 'node:fs';
+import path from 'node:path';
 import { env } from '../lib/env.js';
 import { buildReleaseAnnouncementText, resolveReleaseVersion } from '../lib/release/announce.js';
 
-const require = createRequire(import.meta.url);
-const pkg = require('../../package.json') as { version: string };
+function resolvePackageVersion(): string {
+  try {
+    const raw = fs.readFileSync(path.resolve(process.cwd(), 'package.json'), 'utf8');
+    const parsed = JSON.parse(raw) as { version?: string };
+    if (parsed.version?.trim()) return parsed.version;
+  } catch {
+    // Ignore and fall back to unknown version text.
+  }
+  return 'unknown';
+}
 
 export class VersionCommand extends Command {
   public override registerApplicationCommands(registry: Command.Registry) {
@@ -16,7 +25,7 @@ export class VersionCommand extends Command {
   public override async chatInputRun(interaction: Command.ChatInputCommandInteraction) {
     const releaseVersion = resolveReleaseVersion();
     const sha = env.GIT_SHA ? ` (${env.GIT_SHA})` : '';
-    const base = releaseVersion ? `${releaseVersion}${sha}` : `v${pkg.version}${sha}`;
+    const base = releaseVersion ? `${releaseVersion}${sha}` : `v${resolvePackageVersion()}${sha}`;
     if (!releaseVersion) return interaction.reply({ content: base });
 
     const release = buildReleaseAnnouncementText(releaseVersion);
