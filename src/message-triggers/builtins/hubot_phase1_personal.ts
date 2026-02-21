@@ -43,7 +43,7 @@ const snap = ['https://media.giphy.com/media/bQ8ZoNK1NqaQw/giphy.gif'];
 const soCute = ['http://imgur.com/hfmyfhl.gif'];
 const technology = ['https://i.imgur.com/URV9Ea1.giff'];
 const twirl = ['https://media.giphy.com/media/6TEo67Fh1CRQk/giphy.gif'];
-const fivethirty = ['https://media.giphy.com/media/QzlAdQIbcM7sY/giphy.gif'];
+const fivethirty = ['https://tenor.com/view/happy-endings-brad-williams-jane-williams-damon-wayans-jr-eliza-coupe-gif-16654670'];
 
 async function collectCandidateMembers(message: Message): Promise<Collection<string, GuildMember>> {
   const channelMembers = (message.channel as { members?: Collection<string, GuildMember> }).members;
