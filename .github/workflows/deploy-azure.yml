@@ -1,0 +1,112 @@
+name: Deploy Azure
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: Docker/release version (e.g. 0.1.10)
+        required: false
+        type: string
+      release_notes:
+        description: Release notes shown in #general and /shundorbot-version
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+  AZURE_WEBAPP_NAME: ${{ secrets.AZURE_WEBAPP_NAME }}
+  AZURE_ACR_NAME: ${{ secrets.AZURE_ACR_NAME }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Resolve release metadata
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+          short_sha="${GITHUB_SHA::7}"
+          if [ -n "${{ github.event.inputs.release_version || '' }}" ]; then
+            release_version="${{ github.event.inputs.release_version }}"
+          else
+            release_version="0.1.${GITHUB_RUN_NUMBER}"
+          fi
+
+          if [ -n "${{ github.event.inputs.release_notes || '' }}" ]; then
+            release_notes="${{ github.event.inputs.release_notes }}"
+          else
+            release_notes="$(git log -1 --pretty=%s)"
+          fi
+
+          echo "short_sha=${short_sha}" >> "$GITHUB_OUTPUT"
+          echo "release_version=${release_version}" >> "$GITHUB_OUTPUT"
+          {
+            echo "release_notes<<EOF"
+            echo "${release_notes}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build and push image to ACR
+        shell: bash
+        run: |
+          set -euo pipefail
+          az acr build \
+            --registry "${AZURE_ACR_NAME}" \
+            --resource-group "${AZURE_RESOURCE_GROUP}" \
+            --image "shundor-bot:${{ steps.meta.outputs.release_version }}" \
+            --file docker/Dockerfile .
+
+      - name: Deploy container image to App Service
+        shell: bash
+        run: |
+          set -euo pipefail
+          az webapp config container set \
+            --resource-group "${AZURE_RESOURCE_GROUP}" \
+            --name "${AZURE_WEBAPP_NAME}" \
+            --container-image-name "${AZURE_ACR_NAME}.azurecr.io/shundor-bot:${{ steps.meta.outputs.release_version }}"
+
+      - name: Update release app settings
+        shell: bash
+        run: |
+          set -euo pipefail
+          az webapp config appsettings set \
+            --resource-group "${AZURE_RESOURCE_GROUP}" \
+            --name "${AZURE_WEBAPP_NAME}" \
+            --settings \
+              RELEASE_VERSION="${{ steps.meta.outputs.release_version }}" \
+              GIT_SHA="${{ steps.meta.outputs.short_sha }}" \
+              RELEASE_NOTES="${{ steps.meta.outputs.release_notes }}" \
+              RELEASE_ANNOUNCE_ENABLED=true \
+              RELEASE_ANNOUNCE_CHANNEL=general
+
+      - name: Restart app
+        shell: bash
+        run: |
+          set -euo pipefail
+          az webapp restart --resource-group "${AZURE_RESOURCE_GROUP}" --name "${AZURE_WEBAPP_NAME}"
+
+      - name: Verify deployment state
+        shell: bash
+        run: |
+          set -euo pipefail
+          az webapp show \
+            --resource-group "${AZURE_RESOURCE_GROUP}" \
+            --name "${AZURE_WEBAPP_NAME}" \
+            --query "{state:state,image:siteConfig.linuxFxVersion,host:defaultHostName}" \
+            -o table
