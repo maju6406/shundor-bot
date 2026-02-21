@@ -1,6 +1,6 @@
 import type { Trigger } from '../types.js';
 import { safeReply } from '../router.js';
-import { PermissionFlagsBits } from 'discord.js';
+import { Collection, GuildMember, Message, PermissionFlagsBits } from 'discord.js';
 import {
   POINTS_COOLDOWN_SECONDS,
   awardPointsBulk,
@@ -45,6 +45,18 @@ const technology = ['https://i.imgur.com/URV9Ea1.giff'];
 const twirl = ['https://media.giphy.com/media/6TEo67Fh1CRQk/giphy.gif'];
 const fivethirty = ['https://media.giphy.com/media/QzlAdQIbcM7sY/giphy.gif'];
 
+async function collectCandidateMembers(message: Message): Promise<Collection<string, GuildMember>> {
+  const channelMembers = (message.channel as { members?: Collection<string, GuildMember> }).members;
+  if (channelMembers && channelMembers.size > 0) return channelMembers;
+
+  try {
+    return await message.guild!.members.fetch();
+  } catch (err) {
+    message.client.emit('warn', `points-bang member fetch failed, falling back to cache: ${String(err)}`);
+    return message.guild!.members.cache;
+  }
+}
+
 export const hubotPersonalPhase1Triggers: Trigger[] = [
   {
     id: 'hubot.hear.points-bang',
@@ -62,8 +74,8 @@ export const hubotPersonalPhase1Triggers: Trigger[] = [
         return;
       }
 
-      const guildMembers = await message.guild.members.fetch();
-      const receiverIds = guildMembers
+      const candidates = await collectCandidateMembers(message);
+      const receiverIds = candidates
         .filter((m) => {
           if (m.user.bot || m.id === message.author.id) return false;
           const perms = message.channel.permissionsFor(m);
